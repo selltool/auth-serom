@@ -95,7 +95,8 @@ def run_telegram_bot(app):
     
     print("Telegram Bot Service Started...")
     # allowed_updates=Update.ALL_TYPES makes sure we get everything, but defaults are usually fine
-    application.run_polling()
+    # stop_signals=None is REQUIRED when running in a background thread to avoid "set_wakeup_fd" errors
+    application.run_polling(stop_signals=None)
 
 def start_bot_thread(app):
     thread = threading.Thread(target=run_telegram_bot, args=(app,))
