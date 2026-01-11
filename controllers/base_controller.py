@@ -20,7 +20,7 @@ except Exception as e:
     print(f"CRITICAL: Failed to load private key at startup: {e}")
 
 def index():
-    return render_template('google_404.html'), 404
+    return render_template('google_404.html'), 200
 
 def login():
     if request.method == 'POST':
