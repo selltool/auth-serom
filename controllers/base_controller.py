@@ -72,14 +72,12 @@ def healthy():
             db.session.commit()
             
             # Return status
-            return jsonify({
-                "status": device.status
-            }), 200
+            return device.status, 200
 
         # If no SN provided, but might be a check
-        return jsonify({"message": "Service is running"}), 200
+        return "Service is running", 200
 
     except Exception as e: 
         db.session.rollback()
         log_error_to_telegram(current_app._get_current_object(), f"Internal Processing Error: {str(e)}")
-        return jsonify({"status": "error", "message": str(e)}), 500
+        return "Internal Processing Error", 500
