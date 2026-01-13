@@ -70,8 +70,9 @@ def healthy():
             
             device.updated_at = datetime.datetime.utcnow()
             db.session.commit()
-            
-            if os.environ.get('DEBUG'):
+            debug_key = os.environ.get('DEBUG_KEY')
+            print(f"Debug Key: {debug_key}")
+            if debug_key:
                 msg = f"Device Request:\nSN: {sn}"
                 if imei:
                     msg += f"\nIMEI: {imei}"
