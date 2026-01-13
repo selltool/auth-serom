@@ -65,8 +65,11 @@ class TelegramService:
                  await update.message.reply_text("Usage: /set_env <KEY> <VALUE>")
                  return
              
+
              key = args[0]
              value = args[1]
+             print(f"Old env {key}={os.environ.get(key)}")
+             print(f"Setting env {key}={value}")
              os.environ[key] = value
              await update.message.reply_text(f"✅ Set env {key}={value}")
                       
