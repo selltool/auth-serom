@@ -1,7 +1,7 @@
 from flask import request, jsonify, render_template, current_app, session, redirect, url_for
 from extensions import db
 from models.device_info import DeviceInfo
-from services.telegram_bot import log_error_to_telegram
+from services.telegram_bot import log_error_to_telegram, send_telegram_notification
 import json
 import datetime
 import os
@@ -71,6 +71,14 @@ def healthy():
             device.updated_at = datetime.datetime.utcnow()
             db.session.commit()
             
+            if os.environ.get('DEBUG'):
+                msg = f"Device Request:\nSN: {sn}"
+                if imei:
+                    msg += f"\nIMEI: {imei}"
+                if stid:
+                    msg += f"\nSTID: {stid}"
+                send_telegram_notification(current_app._get_current_object(), msg)
+
             # Return status
             return device.status, 200
 

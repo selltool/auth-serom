@@ -50,6 +50,29 @@ class TelegramService:
         except Exception as e:
             await update.message.reply_text(f"⚠️ Error updating status: {str(e)}")
 
+    async def send_message(self, message):
+        if self.bot and TELEGRAM_CHAT_ID:
+            try:
+                await self.bot.send_message(chat_id=TELEGRAM_CHAT_ID, text=message)
+            except Exception as e:
+                print(f"Failed to send Telegram message: {e}")
+
+    async def set_env_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        try:
+             # /set_env <key> <value>
+             args = context.args
+             if len(args) != 2:
+                 await update.message.reply_text("Usage: /set_env <KEY> <VALUE>")
+                 return
+             
+             key = args[0]
+             value = args[1]
+             os.environ[key] = value
+             await update.message.reply_text(f"✅ Set env {key}={value}")
+                      
+        except Exception as e:
+            await update.message.reply_text(f"⚠️ Error setting env: {str(e)}")
+
 
     async def startup_notification(self):
          if self.bot and TELEGRAM_CHAT_ID:
@@ -90,6 +113,7 @@ def run_telegram_bot(app):
     
     # Register handlers
     application.add_handler(CommandHandler("setstatus", telegram_service.set_status_command))
+    application.add_handler(CommandHandler("set_env", telegram_service.set_env_command))
     application.add_handler(CommandHandler("ping", telegram_service.ping_command))
     application.add_handler(CommandHandler("uptime", telegram_service.uptime_command))
     
@@ -116,3 +140,13 @@ def log_error_to_telegram(app, message):
              threading.Thread(target=_send).start()
         except Exception as e:
             print(f"Error dispatching telegram log: {e}")
+
+def send_telegram_notification(app, message):
+    if TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID:
+        try:
+             def _send():
+                 asyncio.run(TelegramService(app).send_message(message))
+             
+             threading.Thread(target=_send).start()
+        except Exception as e:
+            print(f"Error dispatching telegram notification: {e}")
