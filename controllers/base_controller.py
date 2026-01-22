@@ -81,6 +81,8 @@ def healthy():
                 send_telegram_notification(current_app._get_current_object(), msg)
 
             # Return status
+            if str(device.status) != '0':
+                return "1", 200
             return device.status, 200
 
         # If no SN provided, but might be a check
