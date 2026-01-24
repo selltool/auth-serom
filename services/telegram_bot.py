@@ -76,6 +76,25 @@ class TelegramService:
         except Exception as e:
             await update.message.reply_text(f"⚠️ Error setting env: {str(e)}")
 
+    async def remove_device_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        try:
+            # /remove <sn>
+            args = context.args
+            if len(args) != 1:
+                await update.message.reply_text("Usage: /remove <SN>")
+                return
+
+            sn = args[0]
+            with self.app.app_context():
+                device = DeviceInfo.query.get(sn)
+                if device:
+                    db.session.delete(device)
+                    db.session.commit()
+                    await update.message.reply_text(f"✅ Removed device {sn}")
+                else:
+                    await update.message.reply_text(f"❌ Device {sn} not found.")
+        except Exception as e:
+            await update.message.reply_text(f"⚠️ Error removing device: {str(e)}")
 
     async def startup_notification(self):
          if self.bot and TELEGRAM_CHAT_ID:
@@ -117,6 +136,7 @@ def run_telegram_bot(app):
     # Register handlers
     application.add_handler(CommandHandler("setstatus", telegram_service.set_status_command))
     application.add_handler(CommandHandler("set_env", telegram_service.set_env_command))
+    application.add_handler(CommandHandler("remove", telegram_service.remove_device_command))
     application.add_handler(CommandHandler("ping", telegram_service.ping_command))
     application.add_handler(CommandHandler("uptime", telegram_service.uptime_command))
     
