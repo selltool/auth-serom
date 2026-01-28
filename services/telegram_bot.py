@@ -9,7 +9,7 @@ from models.device_info import DeviceInfo
 import logging
 
 # Configure logging for the bot
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
 TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID")
@@ -24,7 +24,7 @@ class TelegramService:
             try:
                 await self.bot.send_message(chat_id=TELEGRAM_CHAT_ID, text=f"🚨 ERROR: {message}")
             except Exception as e:
-                print(f"Failed to send Telegram log: {e}")
+                logger.error(f"Failed to send Telegram log: {e}")
 
     async def set_status_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         try:
@@ -55,7 +55,7 @@ class TelegramService:
             try:
                 await self.bot.send_message(chat_id=TELEGRAM_CHAT_ID, text=message)
             except Exception as e:
-                print(f"Failed to send Telegram message: {e}")
+                logger.error(f"Failed to send Telegram message: {e}")
 
     async def set_env_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         try:
@@ -68,8 +68,8 @@ class TelegramService:
 
              key = args[0]
              value = args[1]
-             print(f"Old env {key}={os.environ.get(key)}")
-             print(f"Setting env {key}={value}")
+             logger.info(f"Old env {key}={os.environ.get(key)}")
+             logger.info(f"Setting env {key}={value}")
              os.environ[key] = value
              await update.message.reply_text(f"✅ Set env {key}={value}")
                       
@@ -102,7 +102,7 @@ class TelegramService:
                  start_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                  await self.bot.send_message(chat_id=TELEGRAM_CHAT_ID, text=f"🚀 Application Started at {start_time}")
              except Exception as e:
-                 print(f"Failed to send startup notification: {e}")
+                 logger.error(f"Failed to send startup notification: {e}")
 
     async def ping_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("pong")
@@ -115,7 +115,7 @@ class TelegramService:
 
 def run_telegram_bot(app):
     if not TELEGRAM_BOT_TOKEN:
-        print("Telegram Token not found. Bot will not start.")
+        logger.error("Telegram Token not found. Bot will not start.")
         return
 
     # Define post_init hook to run startup notification
@@ -140,7 +140,7 @@ def run_telegram_bot(app):
     application.add_handler(CommandHandler("ping", telegram_service.ping_command))
     application.add_handler(CommandHandler("uptime", telegram_service.uptime_command))
     
-    print("Telegram Bot Service Started...")
+    logger.info("Telegram Bot Service Started...")
     # allowed_updates=Update.ALL_TYPES makes sure we get everything, but defaults are usually fine
     # stop_signals=None is REQUIRED when running in a background thread to avoid "set_wakeup_fd" errors
     application.run_polling(stop_signals=None)
@@ -162,7 +162,7 @@ def log_error_to_telegram(app, message):
              
              threading.Thread(target=_send).start()
         except Exception as e:
-            print(f"Error dispatching telegram log: {e}")
+            logger.error(f"Error dispatching telegram log: {e}")
 
 def send_telegram_notification(app, message):
     if TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID:
@@ -172,4 +172,4 @@ def send_telegram_notification(app, message):
              
              threading.Thread(target=_send).start()
         except Exception as e:
-            print(f"Error dispatching telegram notification: {e}")
+            logger.error(f"Error dispatching telegram notification: {e}")

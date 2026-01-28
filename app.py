@@ -1,5 +1,10 @@
 import os
 from flask import Flask, jsonify
+import logging
+
+# Configure logging
+logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
+
 from sqlalchemy.exc import SQLAlchemyError
 from extensions import db
 from routes.base_routes import base_bp
@@ -28,7 +33,7 @@ with app.app_context():
         db.create_all()
     except SQLAlchemyError as e:
         log_error_to_telegram(app, f"Database Connection Error: {str(e)}")
-        print(f"Database connection error (could not create tables): {e}")
+        logging.error(f"Database connection error (could not create tables): {e}")
 
 if __name__ == '__main__':
     # Start Telegram Bot
